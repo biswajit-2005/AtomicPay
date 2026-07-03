@@ -1,0 +1,179 @@
+Link : https://shorturl.at/z9nOV
+
+erDiagram
+
+    USERS {
+        UUID id PK
+        VARCHAR email
+        VARCHAR phone
+        VARCHAR password_hash
+        VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR profile_photo_url
+        BOOLEAN email_verified
+        VARCHAR status
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    ROLES {
+        UUID id PK
+        VARCHAR name
+    }
+
+    USER_ROLES {
+        UUID id PK
+        UUID user_id FK
+        UUID role_id FK
+        TIMESTAMP created_at
+    }
+
+    DEVICES {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR device_name
+        VARCHAR device_type
+        VARCHAR ip_address
+        TIMESTAMP last_login
+        BOOLEAN is_active
+        TIMESTAMP created_at
+    }
+
+    REFRESH_TOKENS {
+        UUID id PK
+        UUID user_id FK
+        UUID device_id FK
+        VARCHAR token_hash
+        TIMESTAMP expires_at
+        TIMESTAMP revoked_at
+        TIMESTAMP created_at
+    }
+
+    KYC_REQUESTS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR aadhaar_number
+        VARCHAR pan_number
+        VARCHAR aadhaar_document_url
+        VARCHAR pan_document_url
+        VARCHAR selfie_url
+        VARCHAR status
+        UUID reviewed_by FK
+        TEXT remarks
+        TIMESTAMP submitted_at
+        TIMESTAMP reviewed_at
+    }
+
+    WALLETS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR wallet_number
+        NUMERIC balance
+        VARCHAR currency
+        VARCHAR status
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    BANK_ACCOUNTS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR bank_name
+        VARCHAR account_holder_name
+        VARCHAR account_number
+        VARCHAR ifsc_code
+        VARCHAR aadhaar_number
+        VARCHAR bank_pin_hash
+        BOOLEAN is_verified
+        VARCHAR status
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    TRANSACTIONS {
+        UUID id PK
+        VARCHAR transaction_reference
+        UUID sender_wallet_id FK
+        UUID receiver_wallet_id FK
+        UUID bank_account_id FK
+        VARCHAR type
+        NUMERIC amount
+        VARCHAR currency
+        VARCHAR status
+        TEXT description
+        UUID idempotency_key_id FK
+        TIMESTAMP completed_at
+        TIMESTAMP created_at
+    }
+
+    LEDGER_ENTRIES {
+        UUID id PK
+        UUID transaction_id FK
+        UUID wallet_id FK
+        VARCHAR entry_type
+        NUMERIC amount
+        NUMERIC opening_balance
+        NUMERIC closing_balance
+        TIMESTAMP created_at
+    }
+
+    NOTIFICATIONS {
+        UUID id PK
+        UUID user_id FK
+        UUID transaction_id FK
+        VARCHAR type
+        VARCHAR title
+        TEXT message
+        VARCHAR status
+        TIMESTAMP sent_at
+        TIMESTAMP created_at
+    }
+
+    AUDIT_LOGS {
+        UUID id PK
+        UUID actor_user_id FK
+        VARCHAR action
+        VARCHAR entity_type
+        UUID entity_id
+        JSON old_data
+        JSON new_data
+        VARCHAR ip_address
+        VARCHAR user_agent
+        TIMESTAMP created_at
+    }
+
+    IDEMPOTENCY_KEYS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR idempotency_key
+        VARCHAR request_hash
+        UUID transaction_id FK
+        VARCHAR status
+        TIMESTAMP expires_at
+        TIMESTAMP created_at
+    }
+
+    USERS ||--|| WALLETS : owns
+    USERS ||--o{ BANK_ACCOUNTS : links
+    USERS ||--o{ DEVICES : logs_in
+    USERS ||--o{ REFRESH_TOKENS : has
+    USERS ||--o| KYC_REQUESTS : submits
+    USERS ||--o{ USER_ROLES : assigned
+    ROLES ||--o{ USER_ROLES : contains
+
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ AUDIT_LOGS : performs
+
+    DEVICES ||--o{ REFRESH_TOKENS : stores
+
+    BANK_ACCOUNTS ||--o{ TRANSACTIONS : add_money
+
+    WALLETS ||--o{ TRANSACTIONS : sender
+    WALLETS ||--o{ TRANSACTIONS : receiver
+
+    TRANSACTIONS ||--|{ LEDGER_ENTRIES : generates
+    WALLETS ||--o{ LEDGER_ENTRIES : records
+
+    TRANSACTIONS ||--o{ NOTIFICATIONS : triggers
+
+    IDEMPOTENCY_KEYS ||--|| TRANSACTIONS : protects
