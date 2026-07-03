@@ -1,0 +1,1 @@
+// RabbitMQ broker connection configuration
