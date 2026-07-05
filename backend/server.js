@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { connectDB, pool } from "./src/config/pg.js";
+import { redisClient, connectRedis } from "./src/config/redis.js";
 
 const app = express();
 
@@ -18,9 +19,8 @@ app.get("/health", (req, res) => {
 const port = process.env.PORT || 5000;
 app.listen(port, async () => {
   await connectDB();
-  //   pool.query('SELECT * from "testTable" ', (err, res) => {
-  //     if (err) throw err;
-  //     console.log(res.rows);
-  //   });
+
+  await connectRedis();
+
   console.log(`Server running on port ${process.env.PORT}`);
 });
