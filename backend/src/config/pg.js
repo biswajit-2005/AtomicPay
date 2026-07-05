@@ -5,7 +5,7 @@ dotenv.config();
 const { Pool } = pg;
 
 // 1.create pool
-const pool = new Pool({
+export const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
