@@ -1,26 +1,21 @@
-import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { connectDB, pool } from "./src/config/pg.js";
-import { redisClient, connectRedis } from "./src/config/redis.js";
+import app from "./src/app.js";
+import { connectDB } from "./src/config/pg.js";
+import { connectRedis } from "./src/config/redis.js";
+import { initDB } from "./src/config/db_init.js";
 
-const app = express();
+import http from "http";
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-
-app.get("/health", (req, res) => {
-  return res.send({ message: "Health OK" });
-});
+const server = http.createServer(app);
 
 const port = process.env.PORT || 5000;
-app.listen(port, async () => {
+server.listen(port, async () => {
   await connectDB();
-
+  await initDB();
   await connectRedis();
 
-  console.log(`Server running on port ${process.env.PORT}`);
+  console.log(`Server running on port ${port}`);
 });
+
